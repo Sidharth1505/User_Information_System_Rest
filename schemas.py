@@ -19,6 +19,7 @@ class UserUpdateSchema(Schema):
     address= fields.Str(required=True)
     contact = fields.Str(required=True)
 
+
 class ProfessionSchema(Schema):
     id = fields.Int(dump_only = True)
     profession_name = fields.Str(required=True)
@@ -26,3 +27,11 @@ class ProfessionSchema(Schema):
 class RoleSchema(Schema):
     id = fields.Int(dump_only=True)
     role_name = fields.Str(required=True)
+
+
+class UserSchema(PlainUserSchema):
+    role_id = fields.Int(required=True,load_only=True)
+    role = fields.Nested(RoleSchema(),dump_only=True)
+
+class RoleUserScehma(RoleSchema):
+    user = fields.List(fields.Nested(PlainUserSchema()), dump_only=True)

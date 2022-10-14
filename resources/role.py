@@ -4,7 +4,7 @@ from db import db
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from models.role import RoleModel
-from schemas import RoleSchema
+from schemas import RoleUserScehma,RoleSchema
 from sqlalchemy.exc import SQLAlchemyError
 
 blp = Blueprint("Roles", __name__, description="Operation on Roles")
@@ -12,11 +12,11 @@ blp = Blueprint("Roles", __name__, description="Operation on Roles")
 @blp.route("/role")
 class RoleList(MethodView):
 
-    @blp.response(200, RoleSchema(many=True))
+    @blp.response(200, RoleUserScehma(many=True))
     def get(self):
         return RoleModel.query.all()
     
-    @blp.arguments(RoleSchema)
+    @blp.arguments(RoleUserScehma)
     @blp.response(201,RoleSchema)
     def post(self, roles):
         if RoleModel.query.filter(RoleModel.role_name==roles["role_name"]).first():
@@ -32,11 +32,11 @@ class RoleList(MethodView):
 @blp.route("/role/<int:role_id>")
 class Role(MethodView):
 
-    @blp.response(200, RoleSchema)
+    @blp.response(200, RoleUserScehma)
     def get(self,role_id):
         return RoleModel.query.get_or_404(role_id)
     
-    @blp.arguments(RoleSchema)
+    @blp.arguments(RoleUserScehma)
     @blp.response(200,RoleSchema)
     def put(self,role_update,role_id):
         role = RoleModel.query.get_or_404(role_id)

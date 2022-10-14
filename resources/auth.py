@@ -26,7 +26,7 @@ class UserRegister(MethodView):
             db.session.add(new_user)
             db.session.commit()
             return new_user
-        except Error as e:
+        except SQLAlchemyError as e:
             print("error thrown is {}".format(e))
         
 

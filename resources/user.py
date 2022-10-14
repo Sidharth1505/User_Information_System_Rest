@@ -4,7 +4,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint,abort
 from db import db
 from models.user import UserModel
-from schemas import UserUpdateSchema, PlainUserSchema
+from schemas import UserUpdateSchema, UserSchema
 from sqlalchemy.exc import SQLAlchemyError
 
 blp =  Blueprint("User",__name__, description="Operation on users")
@@ -12,13 +12,13 @@ blp =  Blueprint("User",__name__, description="Operation on users")
 @blp.route("/users")
 class UserList(MethodView):
     @jwt_required()
-    @blp.response(200,PlainUserSchema(many=True))
+    @blp.response(200,UserSchema(many=True))
     def get(self):
         return UserModel.query.all()
     
     @jwt_required()
-    @blp.arguments(PlainUserSchema)
-    @blp.response(200,PlainUserSchema)
+    @blp.arguments(UserSchema)
+    @blp.response(200,UserSchema)
     def post(self,user_data):
         user = UserModel(**user_data)
         try:
@@ -31,7 +31,7 @@ class UserList(MethodView):
 @blp.route("/users/<int:user_id>")
 class User(MethodView):
     @jwt_required()
-    @blp.response(200, PlainUserSchema)
+    @blp.response(200, UserSchema)
     def get(self,user_id):
         user =  UserModel.query.get_or_404(user_id)
         return user
@@ -39,7 +39,7 @@ class User(MethodView):
 
     @jwt_required()
     @blp.arguments(UserUpdateSchema)
-    @blp.response(200,PlainUserSchema)
+    @blp.response(200,UserSchema)
     def put(self,user_data,user_id):
         user = UserModel.query.get(user_id)
         if user:
