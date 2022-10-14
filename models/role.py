@@ -1,0 +1,7 @@
+from db import db
+
+class RoleModel(db.Model):
+    __tablename__ = "role"
+
+    id = db.Column(db.Integer, primary_key = True, nullable=False)
+    role_name = db.Column(db.String(15), nullable=False)
