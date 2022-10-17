@@ -8,6 +8,7 @@ from models import AuthModel
 from schemas import PlainAuthSchema,PlainUserSchema
 from flask_jwt_extended import create_access_token,get_jwt,jwt_required
 from passlib.hash import pbkdf2_sha256
+from blocklist import BLOCKLIST
 
 blp = Blueprint("Authentication","authentication",description="Operations on authentication")
 
@@ -39,7 +40,16 @@ class UserLogin(MethodView):
         user = AuthModel.query.filter(AuthModel.username == login_data["username"]).first()
 
         if user and pbkdf2_sha256.verify(login_data["password"],user.password):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=user.username)
             return {"access_token":access_token},200
         
         abort(401,message="Invalid Credentials, please check and try again")
+
+
+@blp.route("/logout")
+class UserLogout(MethodView):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"message": "Successfully logged out"}, 200

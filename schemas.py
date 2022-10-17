@@ -6,7 +6,7 @@ class PlainUserSchema(Schema):
     name = fields.Str(required=True)
     address = fields.Str(required=True)
     contact = fields.Str(required=True)
-    dob = fields.Str(required=True)
+    dob = fields.Date(required=True)
     gender = fields.Str(required=True)
 
 class PlainAuthSchema(Schema):
