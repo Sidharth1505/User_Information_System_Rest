@@ -1,5 +1,8 @@
+from ast import dump
 from marshmallow import Schema,fields
 from pkg_resources import require
+
+from models import profession
 
 class PlainUserSchema(Schema):
     id = fields.Int()
@@ -31,9 +34,14 @@ class RoleSchema(Schema):
 
 class UserSchema(PlainUserSchema):
     role_id = fields.Int(required=True,load_only=True)
+    profession_id = fields.Int(required=True,load_only=True)
+    profession = fields.Nested(ProfessionSchema(),dump_only=True)
     role = fields.Nested(RoleSchema(),dump_only=True)
 
 class RoleUserScehma(RoleSchema):
+    user = fields.List(fields.Nested(PlainUserSchema()), dump_only=True)
+
+class Profession(Schema):
     user = fields.List(fields.Nested(PlainUserSchema()), dump_only=True)
 
 class UserRoleMapSchema(Schema):
@@ -41,5 +49,7 @@ class UserRoleMapSchema(Schema):
     user_id = fields.Int(required=True)
     role_id = fields.Int(required=True)
 
-
-
+class UserProfessionMapSchema(Schema):
+    id = fields.Int(dump_only=True)
+    user_id = fields.Int(dump_only=True)
+    profession_id = fields.Int(dump_only=True)

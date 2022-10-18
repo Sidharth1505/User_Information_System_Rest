@@ -4,8 +4,10 @@ from flask_jwt_extended import jwt_required,get_jwt
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
 from db import db
+from models import profession, user_profession_map
 from models.user import UserModel
 from models.user_role_map import UserRoleMapModel
+from models.user_profession_map import UserProfessionModel
 from schemas import UserUpdateSchema, PlainUserSchema, UserSchema
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -21,17 +23,20 @@ class UserList(MethodView):
         except SQLAlchemyError:
             abort(501, message="Error in connecting the database")
     
-    @jwt_required()
+    # @jwt_required()
     @blp.arguments(UserSchema)
     @blp.response(200,PlainUserSchema)
     def post(self,user_data):
-        user_id,user,role_id = user_data["id"],user_data, user_data["role_id"]
+        user_id,user,role_id,profession_id = user_data["id"],user_data, user_data["role_id"],user_data["profession_id"]
         user_role_map = {"user_id":user_id,"role_id":role_id}
+        user_profession_map = {"user_id":user_id,"profession_id":profession_id}
         user = UserModel(**user)
         rolemap = UserRoleMapModel(**user_role_map)
+        usermap = UserProfessionModel(**user_profession_map)
         try:
             db.session.add(user)
             db.session.add(rolemap)
+            db.session.add(usermap)
             db.session.commit()
         except SQLAlchemyError as e:
             abort(500,message="Error occurred while creating the user {}".format(e))

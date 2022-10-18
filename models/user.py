@@ -1,4 +1,5 @@
 from db import db
+from models import profession
 from models.user_role_map import UserRoleMapModel
 
 class UserModel(db.Model):
@@ -12,3 +13,5 @@ class UserModel(db.Model):
     gender = db.Column(db.String(15),nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     role = db.relationship("RoleModel",back_populates="user")
+    profession_id = db.Column(db.Integer,db.ForeignKey("profession.id"))
+    profession = db.relationship("ProfessionModel",back_populates="user_profession")
