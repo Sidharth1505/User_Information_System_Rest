@@ -2,7 +2,7 @@ from marshmallow import Schema,fields
 from pkg_resources import require
 
 class PlainUserSchema(Schema):
-    id = fields.Int(dump_only=True)
+    id = fields.Int()
     name = fields.Str(required=True)
     address = fields.Str(required=True)
     contact = fields.Str(required=True)
@@ -35,3 +35,11 @@ class UserSchema(PlainUserSchema):
 
 class RoleUserScehma(RoleSchema):
     user = fields.List(fields.Nested(PlainUserSchema()), dump_only=True)
+
+class UserRoleMapSchema(Schema):
+    id = fields.Int(dump_only=True)
+    user_id = fields.Int(required=True)
+    role_id = fields.Int(required=True)
+
+
+

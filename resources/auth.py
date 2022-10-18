@@ -40,7 +40,7 @@ class UserLogin(MethodView):
         user = AuthModel.query.filter(AuthModel.username == login_data["username"]).first()
 
         if user and pbkdf2_sha256.verify(login_data["password"],user.password):
-            access_token = create_access_token(identity=user.username)
+            access_token = create_access_token(identity=user.id)
             return {"access_token":access_token},200
         
         abort(401,message="Invalid Credentials, please check and try again")

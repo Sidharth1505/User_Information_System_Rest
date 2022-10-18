@@ -1,4 +1,5 @@
 from db import db
+from models.user_role_map import UserRoleMapModel
 
 class RoleModel(db.Model):
     __tablename__ = "role"

@@ -8,13 +8,16 @@ from models import ProfessionModel, profession
 from schemas import ProfessionSchema
 
 blp = Blueprint("Profession", __name__,description="Operation on Profession Table")
-
+ERROR = "Error {}"
 @blp.route("/profession")
 class ProfessionList(MethodView):
 
     @blp.response(200,ProfessionSchema(many=True))
     def get(self):
-        return ProfessionModel.query.all()
+        try:
+            return ProfessionModel.query.all()
+        except SQLAlchemyError as e:
+            abort(500,message=ERROR.format(e))
 
     @blp.arguments(ProfessionSchema)
     @blp.response(200, ProfessionSchema)
@@ -35,26 +38,35 @@ class Professsion(MethodView):
 
     @blp.response(200, ProfessionSchema)
     def get(self,profession_id):
-        profession = ProfessionModel.query.get_or_404(profession_id)
-        return profession
+        try:
+            profession = ProfessionModel.query.get_or_404(profession_id)
+            return profession
+        except SQLAlchemyError as e:
+            abort(500,message=ERROR.format(e))
 
     @blp.arguments(ProfessionSchema)
     @blp.response(200, ProfessionSchema)
     def put(self,profession_data,profession_id):
-        profession = ProfessionModel.query.get_or_404(profession_id)
-        if profession:
-            profession.profession_name = profession_data["profession_name"]
-        else:
-            profession = ProfessionModel(id=profession_id,**profession_data)
+        try:
+            profession = ProfessionModel.query.get_or_404(profession_id)
+            if profession:
+                profession.profession_name = profession_data["profession_name"]
+            else:
+                profession = ProfessionModel(id=profession_id,**profession_data)
         
-        db.session.add(profession)
-        db.session.commit()
+            db.session.add(profession)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            abort(500,message=ERROR.format(e))
         return profession
 
     def delete(self,profession_id):
-        profession = ProfessionModel.query.get_or_404(profession_id)
-        db.session.delete(profession)
-        db.session.commit()
+        try:
+            profession = ProfessionModel.query.get_or_404(profession_id)
+            db.session.delete(profession)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            abort(500,message=ERROR.format(e))
 
         return {"message":"Deletion Successful"},200
 

@@ -12,7 +12,8 @@ from resources.auth import blp as AuthBluePrint
 from resources.profession import blp as ProfessionBluePrint
 from resources.role import blp as RoleBluePrint
 
-from resources.user import User
+from models.user_role_map import UserRoleMapModel
+from models.role import RoleModel
 
 def create_app(db_url=None):
     app = Flask(__name__)
@@ -35,7 +36,10 @@ def create_app(db_url=None):
 
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):
-        if identity == "Sidharth":
+        role_id = UserRoleMapModel.query.filter(UserRoleMapModel.user_id==identity).first().role_id
+        role = RoleModel.query.filter(RoleModel.id==role_id).first().role_name
+        print(role)
+        if role == "admin":
             return {"is_admin": True}
         return {"is_admin": False}
 

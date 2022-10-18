@@ -1,10 +1,12 @@
+from email import message
 import imp
 from flask_jwt_extended import jwt_required,get_jwt
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
 from db import db
 from models.user import UserModel
-from schemas import UserUpdateSchema, UserSchema
+from models.user_role_map import UserRoleMapModel
+from schemas import UserUpdateSchema, PlainUserSchema, UserSchema
 from sqlalchemy.exc import SQLAlchemyError
 
 blp =  Blueprint("User",__name__, description="Operation on users")
@@ -14,44 +16,55 @@ class UserList(MethodView):
     @jwt_required()
     @blp.response(200,UserSchema(many=True))
     def get(self):
-        return UserModel.query.all()
+        try:
+            return UserModel.query.all()
+        except SQLAlchemyError:
+            abort(501, message="Error in connecting the database")
     
     @jwt_required()
     @blp.arguments(UserSchema)
-    @blp.response(200,UserSchema)
+    @blp.response(200,PlainUserSchema)
     def post(self,user_data):
-        user = UserModel(**user_data)
+        user_id,user,role_id = user_data["id"],user_data, user_data["role_id"]
+        user_role_map = {"user_id":user_id,"role_id":role_id}
+        user = UserModel(**user)
+        rolemap = UserRoleMapModel(**user_role_map)
         try:
             db.session.add(user)
+            db.session.add(rolemap)
             db.session.commit()
-        except SQLAlchemyError:
-            abort(500,message="Error occurred while creating the user")
+        except SQLAlchemyError as e:
+            abort(500,message="Error occurred while creating the user {}".format(e))
         return user,201
 
 @blp.route("/users/<int:user_id>")
 class User(MethodView):
     @jwt_required()
-    @blp.response(200, UserSchema)
+    @blp.response(200, PlainUserSchema)
     def get(self,user_id):
-        user =  UserModel.query.get_or_404(user_id)
+        try:
+            user =  UserModel.query.get_or_404(user_id)
+        except SQLAlchemyError as e:
+            abort(500, message="Error occured while accessing the database {}".format(e))
         return user
 
 
     @jwt_required()
     @blp.arguments(UserUpdateSchema)
-    @blp.response(200,UserSchema)
+    @blp.response(200,PlainUserSchema)
     def put(self,user_data,user_id):
-        user = UserModel.query.get(user_id)
-        if user:
-            user.name = user_data["name"]
-            user.address = user_data["address"]
-            user.contact = user_data["contact"]
-        else:
-            user = UserModel(id=user_id,**user_data)
-
-        db.session.add(user)
-        db.session.commit()
-
+        try:
+            user = UserModel.query.get(user_id)
+            if user:
+                user.name = user_data["name"]
+                user.address = user_data["address"]
+                user.contact = user_data["contact"]
+            else:
+                user = UserModel(id=user_id,**user_data)
+            db.session.add(user)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            abort(500, message="Error occured {}".format(e))
         return user
 
     @jwt_required()
@@ -59,8 +72,11 @@ class User(MethodView):
         jwt = get_jwt()
         if not jwt.get("is_admin"):
             abort(401, message="Admin privilege required.")
-        user = UserModel.query.get_or_404(user_id)
-        db.session.delete(user)
-        db.session.commit()
+        try:
+            user = UserModel.query.get_or_404(user_id)
+            db.session.delete(user)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            abort(500,message="Error occurred {}".format(e))
 
         return {"message":"User deleted successfully"}
