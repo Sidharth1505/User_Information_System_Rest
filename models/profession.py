@@ -5,4 +5,4 @@ class ProfessionModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     profession_name = db.Column(db.String(25), nullable = False)
-    user_profession = db.relationship("UserModel",back_populates="profession")
+    # user_profession = db.relationship("UserModel",back_populates="profession")

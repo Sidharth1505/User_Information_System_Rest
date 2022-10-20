@@ -27,16 +27,18 @@ class UserList(MethodView):
     @blp.arguments(UserSchema)
     @blp.response(200,PlainUserSchema)
     def post(self,user_data):
-        user_id,user,role_id,profession_id = user_data["id"],user_data, user_data["role_id"],user_data["profession_id"]
-        user_role_map = {"user_id":user_id,"role_id":role_id}
-        user_profession_map = {"user_id":user_id,"profession_id":profession_id}
+        _user_id,user,role_id,_profession_id = user_data["id"],user_data, user_data["role_id"],user_data["profession_id"]
+        del user["profession_id"]
+        user_role_map = {"user_id":_user_id,"role_id":role_id}
+        user_profession_map = []
         user = UserModel(**user)
+        for id in _profession_id:
+            user_profession_map.append(UserProfessionModel(profession_id=id))
+        user.profession = user_profession_map
         rolemap = UserRoleMapModel(**user_role_map)
-        usermap = UserProfessionModel(**user_profession_map)
         try:
             db.session.add(user)
             db.session.add(rolemap)
-            db.session.add(usermap)
             db.session.commit()
         except SQLAlchemyError as e:
             abort(500,message="Error occurred while creating the user {}".format(e))

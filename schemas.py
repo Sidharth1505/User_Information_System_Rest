@@ -34,7 +34,7 @@ class RoleSchema(Schema):
 
 class UserSchema(PlainUserSchema):
     role_id = fields.Int(required=True,load_only=True)
-    profession_id = fields.Int(required=True,load_only=True)
+    profession_id = fields.List(fields.Int(),required=True,load_only=True)
     profession = fields.Nested(ProfessionSchema(),dump_only=True)
     role = fields.Nested(RoleSchema(),dump_only=True)
 
