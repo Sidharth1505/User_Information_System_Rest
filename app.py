@@ -28,11 +28,24 @@ def create_app(db_url=None):
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///data.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PROPAGATE_EXCEPTIONS"] = True
+
+
+    
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+    app.config['JWT_COOKIE_SECURE'] = True
+    app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
+    # app.config['JWT_REFRESH_COOKIE_PATH'] = '/token/refresh'
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = True
+    app.config['JWT_CSRF_IN_COOKIES'] = True
+
+
     db.init_app(app)
     api = Api(app)
 
     app.config["JWT_SECRET_KEY"] = "228093562702811058850520514772539608930"
     jwt = JWTManager(app)
+
+    
 
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):

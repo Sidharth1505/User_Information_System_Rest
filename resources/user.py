@@ -15,7 +15,7 @@ blp =  Blueprint("User",__name__, description="Operation on users")
 
 @blp.route("/users")
 class UserList(MethodView):
-    @jwt_required()
+    # @jwt_required()
     @blp.response(200,UserSchema(many=True))
     def get(self):
         try:
